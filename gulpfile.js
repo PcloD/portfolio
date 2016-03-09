@@ -13,7 +13,7 @@ var watchify = require('watchify');
 
 function compile(watch) {
 
-  var bundler = browserify(['./src/js/folio.js'], { debug: true }).transform(babel);
+  var bundler = browserify(['./src/js/folio.js','./src/js/bitmap_parser.js'], { debug: true }).transform(babel);
   if (watch) {
     bundler = watchify(bundler);
   }
@@ -26,10 +26,10 @@ function compile(watch) {
       })
       .pipe(source('folio.js'))
       .pipe(buffer())
-      .pipe(uglify())
+      // .pipe(uglify())
       // .pipe(sourcemaps.init({ loadMaps: true }))
       // .pipe(sourcemaps.write('./'))
-      .pipe(gulp.dest("deploy/"));
+      .pipe(gulp.dest("deploy/js"));
 
     compileJade();
     compileStylus();
@@ -70,7 +70,7 @@ function compileJade() {
 }
 
 function compileStylus() {
-  return gulp.src('src/css/*.styl')
+  return gulp.src('src/stylus/*.styl')
     .pipe(stylus({
       compress: true
     }))
