@@ -67,7 +67,7 @@ function init() {
 	renderer.setClearColor( scene.fog.color );
 
 
-	var pixels = bmp.getPixels();
+	var pixels = bmp.getPixels(num(0, 50));
 	var blocks = [];
 	function createBox(index) {
 		var pixel = pixels[index];

@@ -1,20 +1,17 @@
 function bitmapParser() {
-	var con = console;
-	var parsed = [];
-	var img = new Image();
-	var bmpwidth = 768, bmpheight = 630;
-	var bmpsize = 70; //180
-
+	let con = console;
+	let img = new Image();
+	let bmpwidth = 768, bmpheight = 630;
+	var canvas, ctx;
 	let loadImage = (callback) => {
 		img.onload = () => {
 
-			con.log("loaded");
+			// con.log("loaded");
 
-			var sw = 128, sh = 126, sx = sw * 2, sy = sh * 2;
-			var canvas = document.createElement("canvas");
+			canvas = document.createElement("canvas");
 			canvas.width = bmpwidth;
 			canvas.height = bmpheight;
-			var ctx = canvas.getContext("2d");
+			ctx = canvas.getContext("2d");
 
 			// document.body.appendChild(canvas);
 
@@ -25,42 +22,37 @@ function bitmapParser() {
 			// var ctx2 = canvas2.getContext("2d");
 
 			ctx.drawImage(img, 0, 0);
-			var pixels = ctx.getImageData(sx, sy, sw, sh).data;
-
-			// con.log(pixels);
-			for (var i = 0, il = pixels.length; i < il; i += 4) {
-				var pixelIndex = i / 4;
-				var red = pixels[i];
-				// var green = pixels[i + 1];
-				// var blue = pixels[i + 2];
-				// var alpha = pixels[i + 3];
-				// con.log(red);
-				// var rgb = 'rgb(' + red + ',' + red + ',' + red + ')';
-
-				// var threshold = 254;
-				// var off = red >= threshold && green >= threshold && blue >= threshold;
-				// var color = document.createElement("div");
-				// document.body.appendChild(color);
-				// color.style.display = "inline-block";
-				// color.style.background = rgba;
-				// color.style.width = color.style.height = "3px"
-
-				// var x = (pixelIndex % bmpsize) * size;
-				// var y = Math.floor(pixelIndex / bmpsize) * size;
-				// ctx2.fillStyle = rgb;
-				// ctx2.fillRect(x, y, size, size);
-
-				parsed.push(red < 250 ? red : null);
-			}
-			// con.log(parsed);
 			callback();
 		};
 
 		img.src = "images/clients.png";
 	}
 
+	let getPixels = (index) => {
+		index = Math.round(index);
+		let maxImages = 30, cols = 6; // 6 x 5 matrix of client images
+		index %= maxImages;
+		let x = index % cols;
+		let y = Math.floor(index / cols);
+		var sw = 128, sh = 126, sx = sw * x, sy = sh * y;
+		var pixels = ctx.getImageData(sx, sy, sw, sh).data;
+		var parsed = [];
+		for (var i = 0, il = pixels.length; i < il; i += 4) {
+			var pixelIndex = i / 4;
+			var red = pixels[i];
+
+			// var x = (pixelIndex % bmpsize) * size;
+			// var y = Math.floor(pixelIndex / bmpsize) * size;
+			// ctx2.fillStyle = rgb;
+			// ctx2.fillRect(x, y, size, size);
+
+			parsed.push(red < 254 ? red : null);
+		}
+		return parsed;
+	}
+
 	return {
-		getPixels: () => { return parsed; },
+		getPixels: getPixels,
 		loadImage: loadImage
 	}
 }
