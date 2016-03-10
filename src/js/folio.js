@@ -1,4 +1,13 @@
 var con = console;
+
+var bmp = require("./bitmap_parser.js")();
+bmp.loadImage(() => {
+	bmp.getPixels();
+	init();
+	con.log("init done");
+});
+
+
 var isMouseDown = false;
 
 var camera, scene, renderer;
