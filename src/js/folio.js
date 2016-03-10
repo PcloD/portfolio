@@ -2,7 +2,6 @@ var con = console;
 
 var bmp = require("./bitmap_parser.js")();
 bmp.loadImage(() => {
-	bmp.getPixels();
 	init();
 	con.log("init done");
 });
@@ -16,34 +15,31 @@ var camPos = {x: 0, y: 0, z: 10};
 
 var sw = window.innerWidth, sh = window.innerHeight;
 
-var cols = 10;
-var rows = 10;
-var gap = 20;
+var cols = 128;
+var rows = 126;
+var gap = 0;
 var size = {
-	width: 20,
-	height: 20,
-	depth: 20,
+	width: 10,
+	height: 10,
+	depth: 1,
 }
-var allRowsDepth = rows * (size.depth + gap);
-var allColsWidth = cols * (size.depth + gap);
+// var allRowsDepth = rows * (size.depth + gap);
+// var allColsWidth = cols * (size.depth + gap);
 
 function num(min, max) { return Math.random() * (max - min) + min; }
 
 function draw(props) {
 
-	var material = new THREE.MeshPhongMaterial( {
-		// ambient: 0x030303,
-		//color: colours[~~(Math.random() * colours.length)],
-		//color: ~~(Math.random() * 0xffffff),
-		color: 0x4444ff,
-		specular: 0xffffff,
-		shininess: 2, //~~(Math.random() * 200),
-		shading: THREE.SmoothShading
-	});
+	// var material = new THREE.MeshPhongMaterial( {
+	// 	color: props.colour,
+	// 	specular: props.colour,
+	// 	shininess: 1,
+	// 	shading: THREE.SmoothShading
+	// });
 
-	// var material = new THREE.MeshBasicMaterial({
-	// 	color: 0xff00ff
-	// })
+	var material = new THREE.MeshBasicMaterial({
+		color: props.colour
+	})
 
 	var geometry = new THREE.BoxGeometry(props.width, props.height, props.depth);
 	var object = new THREE.Mesh(geometry, material);
@@ -53,17 +49,16 @@ function draw(props) {
 function init() {
 
 	scene = new THREE.Scene();
-	scene.fog = new THREE.FogExp2(0x400000, 0.001);
+	scene.fog = new THREE.FogExp2(0xffffff, 0.001);
 
 	camera = new THREE.PerspectiveCamera( 100, sw / sh, 1, 10000 );
 	scene.add( camera );
 
-	// lights don't work either - out of the box anyway, not sure how to feed into shader
-	var lightAbove = new THREE.DirectionalLight(0xff8080, 2);
-	lightAbove.position.set(0, 1, 0.25).normalize();
+	var lightAbove = new THREE.DirectionalLight(0xffff80, 1);
+	lightAbove.position.set(-1, 1, 0.25).normalize();
 	scene.add( lightAbove );
 
-	var lightAbove2 = new THREE.DirectionalLight(0xff8080, 2);
+	var lightAbove2 = new THREE.DirectionalLight(0xff80ff, 1);
 	lightAbove2.position.set(1, 1, 0.25).normalize();
 	scene.add( lightAbove2 );
 
@@ -71,36 +66,57 @@ function init() {
 	renderer.setSize( sw, sh );
 	renderer.setClearColor( scene.fog.color );
 
-	function createBox() {
-		var xi = Math.floor(Math.random() * cols);
-		var yi = 0;
-		var zi = Math.floor(Math.random() * rows);
 
-		var x = (xi - cols / 2) * (size.width + gap);
-		var y = yi;
-		var z = zi * (size.depth + gap);
+	var pixels = bmp.getPixels();
+	var blocks = [];
+	function createBox(index) {
+		var pixel = pixels[index];
+		if (pixel === null) return;
 
-		var box = draw(size);
-		box.position.x = x;
-		box.position.y = y;
-		box.position.z = z;
+		var xi = index % cols;
+		var yi = Math.floor(index / cols);
+		var x = (-xi + cols / 2) * (size.width + gap);
+		var y = (-yi + rows / 2) * (size.height + gap);
+		var z = -2000;
 
-		// boxes[yai][zai][xai] = box;
-		// boxes1d.push(box);
+		var box = draw({
+			colour: (pixel << 16 | pixel << 8 | pixel),
+			depth: size.depth,
+			height: size.height,
+			width: size.width
+		});
 
-		// con.log(box);
+		blocks.push(box);
+
+		var object = {
+			x: x,
+			y: y,
+			z: z
+		};
+
+		box.position.set(object.x, object.y, object.z);
+
+		TweenMax.to(object, num(0.5, 1.5), {
+			// x: x,
+			// y: y,
+			z: 1200,
+			delay: num(0.2, 1.5),
+			onUpdate: () => {
+				box.position.set(object.x, object.y, object.z);
+			}
+		});
 
 		scene.add(box);
+
 	}
 
-
-	for (var i = 0, il = rows * cols; i < il; i++) {
-		createBox();
+	for (var i = 0, il = pixels.length; i < il; i++) {
+		createBox(i);
 	};
 
 	document.body.appendChild(renderer.domElement);
 
-/*
+
 	function listen(eventNames, callback) {
 		for (var i = 0; i < eventNames.length; i++) {
 			window.addEventListener(eventNames[i], callback);
@@ -127,7 +143,7 @@ function init() {
 		e.preventDefault();
 		isMouseDown = false;
 	});
-*/
+
 	render(0);
 
 }

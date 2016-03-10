@@ -2,6 +2,7 @@ function bitmapParser() {
 	var con = console;
 	var parsed = [];
 	var img = new Image();
+	var bmpwidth = 768, bmpheight = 630;
 	var bmpsize = 70; //180
 
 	let loadImage = (callback) => {
@@ -9,16 +10,19 @@ function bitmapParser() {
 
 			con.log("loaded");
 
-			var sx = 0, sy = 0, sw = bmpsize, sh = bmpsize;
+			var sw = 128, sh = 126, sx = sw * 2, sy = sh * 2;
 			var canvas = document.createElement("canvas");
-			document.body.appendChild(canvas);
+			canvas.width = bmpwidth;
+			canvas.height = bmpheight;
 			var ctx = canvas.getContext("2d");
 
-			var size = 2;
-			var canvas2 = document.createElement("canvas");
-			canvas2.width = canvas2.height = size * bmpsize;
-			document.body.appendChild(canvas2);
-			var ctx2 = canvas2.getContext("2d");
+			// document.body.appendChild(canvas);
+
+			// var size = 2;
+			// var canvas2 = document.createElement("canvas");
+			// canvas2.width = canvas2.height = size * bmpsize;
+			// document.body.appendChild(canvas2);
+			// var ctx2 = canvas2.getContext("2d");
 
 			ctx.drawImage(img, 0, 0);
 			var pixels = ctx.getImageData(sx, sy, sw, sh).data;
@@ -31,7 +35,7 @@ function bitmapParser() {
 				// var blue = pixels[i + 2];
 				// var alpha = pixels[i + 3];
 				// con.log(red);
-				var rgb = 'rgb(' + red + ',' + red + ',' + red + ')';
+				// var rgb = 'rgb(' + red + ',' + red + ',' + red + ')';
 
 				// var threshold = 254;
 				// var off = red >= threshold && green >= threshold && blue >= threshold;
@@ -41,10 +45,10 @@ function bitmapParser() {
 				// color.style.background = rgba;
 				// color.style.width = color.style.height = "3px"
 
-				var x = (pixelIndex % bmpsize) * size;
-				var y = Math.floor(pixelIndex / bmpsize) * size;
-				ctx2.fillStyle = rgb;
-				ctx2.fillRect(x, y, size, size);
+				// var x = (pixelIndex % bmpsize) * size;
+				// var y = Math.floor(pixelIndex / bmpsize) * size;
+				// ctx2.fillStyle = rgb;
+				// ctx2.fillRect(x, y, size, size);
 
 				parsed.push(red < 250 ? red : null);
 			}
@@ -52,7 +56,7 @@ function bitmapParser() {
 			callback();
 		};
 
-		img.src = "images/test.png";
+		img.src = "images/clients.png";
 	}
 
 	return {
