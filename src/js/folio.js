@@ -51,7 +51,7 @@ function init() {
 	scene = new THREE.Scene();
 	scene.fog = new THREE.FogExp2(0xffffff, 0.001);
 
-	camera = new THREE.PerspectiveCamera( 100, sw / sh, 1, 10000 );
+	camera = new THREE.PerspectiveCamera(150, sw / sh, 1, 1000);
 	scene.add( camera );
 
 	var lightAbove = new THREE.DirectionalLight(0xffff80, 1);
@@ -71,13 +71,8 @@ function init() {
 	var blocks = [];
 	function createBox(index) {
 		var pixel = pixels[index];
-		if (pixel === null) return;
+		if (pixel === null) return;// pixel = 0x4f;
 
-		var xi = index % cols;
-		var yi = Math.floor(index / cols);
-		var x = (-xi + cols / 2) * (size.width + gap);
-		var y = (-yi + rows / 2) * (size.height + gap);
-		var z = -2000;
 
 		var box = draw({
 			colour: (pixel << 16 | pixel << 8 | pixel),
@@ -87,7 +82,14 @@ function init() {
 		});
 
 		blocks.push(box);
+		scene.add(box);
 
+
+		var xi = index % cols;
+		var yi = Math.floor(index / cols);
+		var x = (-xi + cols / 2) * (size.width + gap);
+		var y = (-yi + rows / 2) * (size.height + gap);
+		var z = -2000;
 		var object = {
 			x: x,
 			y: y,
@@ -96,23 +98,59 @@ function init() {
 
 		box.position.set(object.x, object.y, object.z);
 
-		TweenMax.to(object, num(0.5, 1.5), {
+		var time = num(0.5, 1.5);
+		var delay = num(0.2, 1.5);
+
+		var anim = TweenMax.to(object, time, {
 			// x: x,
 			// y: y,
-			z: 1200,
-			delay: num(0.2, 1.5),
+			z: num(-25, 25),
+			delay: delay,
+			onUpdate: () => {
+				box.position.set(object.x, object.y, object.z);
+			}
+		});
+		var anim2 = TweenMax.to(object, 0.3, {
+			// x: x,
+			// y: y,
+			z: 0,
+			delay: 3,
 			onUpdate: () => {
 				box.position.set(object.x, object.y, object.z);
 			}
 		});
 
-		scene.add(box);
+		// setTimeout(() => {
+		// 	con.log("now... ");
+		// 	anim.timeScale( 0.2 ); //sets timeScale to half-speed
+		// }, 1000)
+
+		// TweenMax.to(object, num(0.5, 1.5), {
+		// 	// x: x,
+		// 	// y: y,
+		// 	z: num(50, 100),
+		// 	delay: num(0.2, 1.5),
+		// 	onUpdate: () => {
+		// 		box.position.set(object.x, object.y, object.z);
+		// 	}
+		// });
+
+
 
 	}
 
 	for (var i = 0, il = pixels.length; i < il; i++) {
 		createBox(i);
 	};
+
+	scene.add(draw({
+		colour: 0xff00ff,
+		depth: 50,
+		height: 50,
+		width: 50
+	}));
+
+
 
 	document.body.appendChild(renderer.domElement);
 
