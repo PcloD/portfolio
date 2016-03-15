@@ -1,11 +1,22 @@
 var con = console;
 
-var bmp = require("./bitmap_parser.js")();
+const constants = require("./constants.js");
+
+// let rand = require("./rand.js");
+// let num = rand.num;
+// con.log(rand, num);
+
+import {num} from "./rand.js";
+
+let transitions = require("./transitions.js");
+let bmp = require("./bitmap_parser.js")();
 bmp.loadImage(() => {
 	init();
 	con.log("init done");
 });
 
+
+con.log("transitions", transitions);
 
 var isMouseDown = false;
 
@@ -15,18 +26,13 @@ var camPos = {x: 0, y: 0, z: 10};
 
 var sw = window.innerWidth, sh = window.innerHeight;
 
-var cols = 128;
-var rows = 126;
-var gap = 0;
-var size = {
-	width: 10,
-	height: 10,
-	depth: 1,
-}
+// var cols = 128;
+// var rows = 126;
+// var gap = 0;
+
 // var allRowsDepth = rows * (size.depth + gap);
 // var allColsWidth = cols * (size.depth + gap);
 
-function num(min, max) { return Math.random() * (max - min) + min; }
 
 function draw(props) {
 
@@ -49,9 +55,9 @@ function draw(props) {
 function init() {
 
 	scene = new THREE.Scene();
-	scene.fog = new THREE.FogExp2(0xffffff, 0.001);
+	scene.fog = new THREE.FogExp2(0xffffff, 0);//0.001);
 
-	camera = new THREE.PerspectiveCamera(150, sw / sh, 1, 1000);
+	camera = new THREE.PerspectiveCamera(60, sw / sh, 1, 10000);
 	scene.add( camera );
 
 	var lightAbove = new THREE.DirectionalLight(0xffff80, 1);
@@ -73,69 +79,17 @@ function init() {
 		var pixel = pixels[index];
 		if (pixel === null) return;// pixel = 0x4f;
 
-
 		var box = draw({
 			colour: (pixel << 16 | pixel << 8 | pixel),
-			depth: size.depth,
-			height: size.height,
-			width: size.width
+			depth: constants.size.depth,
+			height: constants.size.height,
+			width: constants.size.width
 		});
 
 		blocks.push(box);
 		scene.add(box);
 
-
-		var xi = index % cols;
-		var yi = Math.floor(index / cols);
-		var x = (-xi + cols / 2) * (size.width + gap);
-		var y = (-yi + rows / 2) * (size.height + gap);
-		var z = -2000;
-		var object = {
-			x: x,
-			y: y,
-			z: z
-		};
-
-		box.position.set(object.x, object.y, object.z);
-
-		var time = num(0.5, 1.5);
-		var delay = num(0.2, 1.5);
-
-		var anim = TweenMax.to(object, time, {
-			// x: x,
-			// y: y,
-			z: num(-25, 25),
-			delay: delay,
-			onUpdate: () => {
-				box.position.set(object.x, object.y, object.z);
-			}
-		});
-		var anim2 = TweenMax.to(object, 0.3, {
-			// x: x,
-			// y: y,
-			z: 0,
-			delay: 3,
-			onUpdate: () => {
-				box.position.set(object.x, object.y, object.z);
-			}
-		});
-
-		// setTimeout(() => {
-		// 	con.log("now... ");
-		// 	anim.timeScale( 0.2 ); //sets timeScale to half-speed
-		// }, 1000)
-
-		// TweenMax.to(object, num(0.5, 1.5), {
-		// 	// x: x,
-		// 	// y: y,
-		// 	z: num(50, 100),
-		// 	delay: num(0.2, 1.5),
-		// 	onUpdate: () => {
-		// 		box.position.set(object.x, object.y, object.z);
-		// 	}
-		// });
-
-
+		transitions.animateIn(box, index);
 
 	}
 
@@ -143,12 +97,16 @@ function init() {
 		createBox(i);
 	};
 
-	scene.add(draw({
+	con.log("blocks", blocks.length);
+
+	var centre = draw({
 		colour: 0xff00ff,
 		depth: 50,
-		height: 50,
-		width: 50
-	}));
+		height: 150,
+		width: 600
+	});
+	centre.position.set(0, 0, 100);
+	scene.add(centre);
 
 
 
@@ -202,7 +160,7 @@ function render(time) {
 
 	camPos.x -= (camPos.x - mouse.x * 400) * 0.02;
 	camPos.y -= (camPos.y - mouse.y * 150) * 0.05;
-	camPos.z = -100;
+	camPos.z = -1000;
 	camera.position.set(camPos.x, camPos.y, camPos.z);
 
 	camera.lookAt( scene.position );

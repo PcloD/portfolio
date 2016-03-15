@@ -1,7 +1,8 @@
 function bitmapParser() {
 	let con = console;
 	let img = new Image();
-	let bmpwidth = 768, bmpheight = 630;
+	// let bmpwidth = 768, bmpheight = 630;
+	let bmpwidth = 384, bmpheight = 126;
 	var canvas, ctx;
 	let loadImage = (callback) => {
 		img.onload = () => {
@@ -30,7 +31,8 @@ function bitmapParser() {
 
 	let getPixels = (index) => {
 		index = Math.round(index);
-		let maxImages = 30, cols = 6; // 6 x 5 matrix of client images
+		// let maxImages = 30, cols = 6; // 6 x 5 matrix of client images
+		let maxImages = 3, cols = 3; // 3 x 1 matrix of client images
 		index %= maxImages;
 		let x = index % cols;
 		let y = Math.floor(index / cols);
