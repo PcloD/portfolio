@@ -2,11 +2,10 @@ var con = console;
 
 const constants = require("./constants.js");
 
-// let rand = require("./rand.js");
+let rand = require("./rand.js");
 // let num = rand.num;
 // con.log(rand, num);
-
-import {num} from "./rand.js";
+// import {num} from "./rand.js";
 
 let transitions = require("./transitions.js");
 let bmp = require("./bitmap_parser.js")();
@@ -15,8 +14,6 @@ bmp.loadImage(() => {
 	con.log("init done");
 });
 
-
-con.log("transitions", transitions);
 
 var isMouseDown = false;
 
@@ -73,31 +70,39 @@ function init() {
 	renderer.setClearColor( scene.fog.color );
 
 
-	var pixels = bmp.getPixels(num(0, 50));
+
 	var blocks = [];
-	function createBox(index) {
-		var pixel = pixels[index];
-		if (pixel === null) return;// pixel = 0x4f;
 
-		var box = draw({
-			colour: (pixel << 16 | pixel << 8 | pixel),
-			depth: constants.size.depth,
-			height: constants.size.height,
-			width: constants.size.width
-		});
+	let renderLogo = (logoIndex) => {
 
-		blocks.push(box);
-		scene.add(box);
+		var pixels = bmp.getPixels(logoIndex);
 
-		transitions.animateIn(box, index);
+		let createBox = (index, pixel) => {
+			var box;
+			if (blocks[index]) {
+				box = blocks[index];
+				transitions.animateBetween(box, pixel, 1);
+			} else {
+				con.log("not found!");
+				box = draw({
+					colour: pixel.r << 16 | pixel.r << 8 | pixel.r,
+					depth: constants.size.depth,
+					height: constants.size.height,
+					width: constants.size.width
+				});
+				blocks.push(box);
+				scene.add(box);
+				transitions.animateIn(box, pixel, 1);
+			}
+		}
 
-	}
+		for (var i = 0, il = pixels.length; i < il; i++) {
+			createBox(i, pixels[i]);
+		};
 
-	for (var i = 0, il = pixels.length; i < il; i++) {
-		createBox(i);
+		con.log("blocks", pixels.length, blocks.length);
+
 	};
-
-	con.log("blocks", blocks.length);
 
 	var centre = draw({
 		colour: 0xff00ff,
@@ -108,9 +113,16 @@ function init() {
 	centre.position.set(0, 0, 100);
 	scene.add(centre);
 
-
-
 	document.body.appendChild(renderer.domElement);
+
+
+
+	var logoIndex = 1;//rand.int(0, 4);
+	renderLogo(logoIndex);
+	setTimeout(() => {
+		renderLogo(++logoIndex);
+	}, 5000);
+
 
 
 	function listen(eventNames, callback) {
@@ -158,7 +170,7 @@ function render(time) {
 	// con.log("render");
 
 
-	camPos.x -= (camPos.x - mouse.x * 400) * 0.02;
+	camPos.x -= (camPos.x - mouse.x * 1200) * 0.05;
 	camPos.y -= (camPos.y - mouse.y * 150) * 0.05;
 	camPos.z = -1000;
 	camera.position.set(camPos.x, camPos.y, camPos.z);

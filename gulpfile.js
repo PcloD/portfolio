@@ -82,17 +82,11 @@ function copyImages() {
     .pipe(gulp.dest('deploy/images/'));
 }
 
-gulp.task('compileJade', function() {
-  compileJade();
-});
+gulp.task('compileJade', compileJade);
 
-gulp.task('compileStylus', function() {
-  compileStylus();
-});
+gulp.task('compileStylus', compileStylus);
 
-gulp.task('copyImages', function() {
-  copyImages();
-});
+gulp.task('copyImages', copyImages);
 
 gulp.task('build', function() { return compile(); });
 gulp.task('watch', function() { return watch(); });

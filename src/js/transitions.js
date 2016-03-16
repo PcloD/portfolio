@@ -1,20 +1,15 @@
 const constants = require("./constants.js");
 // let rand = require("./rand.js");
-import {num} from "./rand.js";
+import {num, int} from "./rand.js";
 
 let transitions = (() => {
 	let con = console;
 
-	let getXY = (index, modifier = {}) => {
+	let getXY = (pixel, modifier = {}) => {
 		var gapX = modifier.gapX || constants.gap;
 		var gapY = modifier.gapY || constants.gap;
-
-		// con.log(gapX, gapY);
-
-		var xi = index % constants.cols;
-		var yi = Math.floor(index / constants.cols);
-		var x = (-xi + constants.cols / 2) * (constants.size.width + gapX);
-		var y = (-yi + constants.rows / 2) * (constants.size.height + gapY);
+		var x = (-pixel.x + constants.cols / 2) * (constants.size.width + gapX);
+		var y = (-pixel.y + constants.rows / 2) * (constants.size.height + gapY);
 		var z = -2000;
 		return {
 			x: x,
@@ -23,12 +18,14 @@ let transitions = (() => {
 	};
 
 
-	let animateIn = (box, index) => {
-		var style = 2;//int(0,1);
+	let animateIn = (box, pixel, style) => {
+		if (style === 0) con.warn("animateIn - you are passing in style which is 0!");
+		style = style || 0; // int(0,1);
 
 		switch(style) {
-			case 0 : // standard transition in to varying y depths, then stabilise
-				var pos = getXY(index);
+
+			case 1 : // standard transition in to varying y depths, then stabilise
+				var pos = getXY(pixel);
 				pos.z = -2000;
 				box.position.set(pos.x, pos.y, pos.z);
 
@@ -50,12 +47,12 @@ let transitions = (() => {
 				});
 				break;
 
-			case 1 : // zoom in with gaps then circular to centre
-				var pos = getXY(index, {gapX: 2, gapY: 2});
+			case 2 : // zoom in with gaps then circular to centre
+				var pos = getXY(pixel, {gapX: 2, gapY: 2});
 				pos.z = -2000;
 				box.position.set(pos.x, pos.y, pos.z);
 
-				var finalPos = getXY(index);
+				var finalPos = getXY(pixel);
 				var time = 1.5, delay = Math.sqrt(finalPos.x * finalPos.x + finalPos.y * finalPos.y) * 0.01;
 				var anim0 = TweenMax.to(pos, time, {
 					z: 0,
@@ -77,8 +74,8 @@ let transitions = (() => {
 
 
 
-			case 2 : // horizontal pan
-				var pos = getXY(index);
+			case 3 : // horizontal pan
+				var pos = getXY(pixel);
 				pos.z = -2000;
 				box.position.set(pos.x, pos.y, pos.z);
 
@@ -92,7 +89,6 @@ let transitions = (() => {
 					}
 				});
 				break;
-
 
 
 		}
@@ -116,12 +112,48 @@ let transitions = (() => {
 
 	}
 
-	let animateOut = (box, index) => {
+	let animateBetween = (box, pixel, style) => {
+		if (style === 0) con.warn("animateBetween - you are passing in style which is 0!");
+		// style = style;// || int(0, 1);
+		// con.log("animateBetween");
 
+		switch(style) {
+			case 1 : // wiggle to new position.
+				var pos = {
+					x: box.position.x,
+					y: box.position.y,
+					z: box.position.z
+				};
+
+
+				var finalPos = getXY(pixel);
+
+				// con.log("animateBetween");
+
+				var time = 2, delay = num(0.2, 1);
+				var anim0 = TweenMax.to(pos, time, {
+					x: finalPos.x,
+					y: finalPos.y,
+					z: -100,
+					delay: delay,
+					// ease: "Bounce.easeOut",
+					onUpdate: () => {
+						box.position.set(pos.x, pos.y, pos.z);
+					}
+				});
+				break;
+			}
+
+	}
+
+
+	let animateOut = (box, pixel, style) => {
+		if (style === 0) con.warn("animateOut - you are passing in style which is 0!");
 	}
 
 	return {
 		animateIn: animateIn,
+		animateBetween: animateBetween,
 		animateOut: animateOut
 	}
 })();
