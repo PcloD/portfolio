@@ -18,7 +18,7 @@ let transitions = (() => {
 	};
 
 
-	let animateIn = (box, pixel, style) => {
+	let animateIn = (index, box, pixel, style) => {
 		if (style === 0) con.warn("animateIn - you are passing in style which is 0!");
 		style = style || 0; // int(0,1);
 
@@ -112,7 +112,7 @@ let transitions = (() => {
 
 	}
 
-	let animateBetween = (box, pixel, style) => {
+	let animateBetween = (index, box, pixel, style) => {
 		if (style === 0) con.warn("animateBetween - you are passing in style which is 0!");
 		// style = style;// || int(0, 1);
 		// con.log("animateBetween");
@@ -142,12 +142,56 @@ let transitions = (() => {
 					}
 				});
 				break;
+
+
+			case 2 : // bezier to new position.
+				var pos = {
+					x: box.position.x,
+					y: box.position.y,
+					z: box.position.z
+				};
+
+				var finalPos = getXY(pixel);
+				var xv = 100, yv = 100, zv = 100
+				var anim0 = TweenMax.to(pos, 5, {
+					bezier:[
+						{x: num(-xv, xv), y: num(-yv, yv), z: num(-zv, zv)},
+						{x: num(-xv, xv), y: num(-yv, yv), z: num(-zv, zv)},
+						{x: finalPos.x, y: finalPos.y, z: 0}
+					],
+					ease: Power1.easeInOut,
+					onUpdate: () => {
+						box.position.set(pos.x, pos.y, pos.z);
+					}
+				});
+				break;
+
+			case 3 : // exterior projected bezier to new position.
+				var pos = {
+					x: box.position.x,
+					y: box.position.y,
+					z: box.position.z
+				};
+
+				var finalPos = getXY(pixel);
+				var m = 2;
+				var anim0 = TweenMax.to(pos, 5, {
+					bezier:[
+						{x: pos.x * m, y: pos.y * m, z: pos.z * m},
+						{x: finalPos.x, y: finalPos.y, z: 0}
+					],
+					ease: Power1.easeInOut,
+					onUpdate: () => {
+						box.position.set(pos.x, pos.y, pos.z);
+					}
+				});
+				break;
 			}
 
 	}
 
 
-	let animateOut = (box, pixel, style) => {
+	let animateOut = (index, box, pixel, style) => {
 		if (style === 0) con.warn("animateOut - you are passing in style which is 0!");
 	}
 

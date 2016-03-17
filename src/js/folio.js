@@ -81,7 +81,7 @@ function init() {
 			var box;
 			if (blocks[index]) {
 				box = blocks[index];
-				transitions.animateBetween(box, pixel, 1);
+				transitions.animateBetween(index, box, pixel, 3);
 			} else {
 				con.log("not found!");
 				box = draw({
@@ -92,7 +92,7 @@ function init() {
 				});
 				blocks.push(box);
 				scene.add(box);
-				transitions.animateIn(box, pixel, 1);
+				transitions.animateIn(index, box, pixel, 1);
 			}
 		}
 
@@ -101,6 +101,11 @@ function init() {
 		};
 
 		con.log("blocks", pixels.length, blocks.length);
+
+		setTimeout(() => {
+			renderLogo(++logoIndex);
+		}, 7000);
+
 
 	};
 
@@ -119,9 +124,6 @@ function init() {
 
 	var logoIndex = 1;//rand.int(0, 4);
 	renderLogo(logoIndex);
-	setTimeout(() => {
-		renderLogo(++logoIndex);
-	}, 5000);
 
 
 
@@ -191,3 +193,5 @@ function render(time) {
 }
 
 // init();
+
+// listening to shakta now... thanks seb!
