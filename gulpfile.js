@@ -83,12 +83,8 @@ function copyImages() {
 }
 
 gulp.task('compileJade', compileJade);
-
 gulp.task('compileStylus', compileStylus);
-
 gulp.task('copyImages', copyImages);
-
 gulp.task('build', function() { return compile(); });
 gulp.task('watch', function() { return watch(); });
-
 gulp.task('default', ['watch']);

@@ -193,6 +193,21 @@ let transitions = (() => {
 
 	let animateOut = (index, box, pixel, style) => {
 		if (style === 0) con.warn("animateOut - you are passing in style which is 0!");
+		var pos = {
+			x: box.position.x,
+			y: box.position.y,
+			z: box.position.z
+		};
+
+		var anim0 = TweenMax.to(pos, 5, {
+			x: box.position.x * 10,
+			y: box.position.y * 10,
+			z: 200,
+			ease: Power2.easeIn,
+			onUpdate: () => {
+				box.position.set(pos.x, pos.y, pos.z);
+			}
+		});
 	}
 
 	return {

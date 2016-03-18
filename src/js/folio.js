@@ -71,7 +71,7 @@ function init() {
 
 
 
-	var blocks = [];
+	var blocks = [], blocksMax = 0;
 
 	let renderLogo = (logoIndex) => {
 
@@ -83,7 +83,6 @@ function init() {
 				box = blocks[index];
 				transitions.animateBetween(index, box, pixel, 3);
 			} else {
-				con.log("not found!");
 				box = draw({
 					colour: pixel.r << 16 | pixel.r << 8 | pixel.r,
 					depth: constants.size.depth,
@@ -96,11 +95,28 @@ function init() {
 			}
 		}
 
-		for (var i = 0, il = pixels.length; i < il; i++) {
+		let killBox = (index) => {
+			if (blocks[index]) {
+				var box = blocks[index];
+				transitions.animateOut(index, box, null, 1);
+			} else {
+				con.log("not found!");
+			}
+		}
+
+		var pixelsMax = pixels.length;
+		for (var i = 0, il = pixelsMax; i < il; i++) {
 			createBox(i, pixels[i]);
 		};
+		blocksMax = Math.max(blocks.length, blocksMax);
+		if (pixelsMax < blocksMax) {
+			for (i = il, il = blocksMax; i < il; i++) {
+				killBox(i);
+			};
+		}
 
-		con.log("blocks", pixels.length, blocks.length);
+
+		con.log("blocks", blocksMax);
 
 		setTimeout(() => {
 			renderLogo(++logoIndex);
@@ -122,7 +138,7 @@ function init() {
 
 
 
-	var logoIndex = 1;//rand.int(0, 4);
+	var logoIndex = 3;//rand.int(0, 4);
 	renderLogo(logoIndex);
 
 
