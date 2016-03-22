@@ -19,6 +19,7 @@ let transitions = (() => {
 
 
 	let animateIn = (index, box, pixel, style) => {
+		box.active = true;
 		if (style === 0) con.warn("animateIn - you are passing in style which is 0!");
 		style = style || 0; // int(0,1);
 
@@ -65,7 +66,7 @@ let transitions = (() => {
 					y: finalPos.y,
 					delay: delay,
 					// ease: "Bounce.easeOut",
-					ease: "Elastic.easeInOut",
+					ease: Elastic.easeInOut,
 					onUpdate: () => {
 						box.position.set(pos.x, pos.y, pos.z);
 					}
@@ -113,9 +114,14 @@ let transitions = (() => {
 	}
 
 	let animateBetween = (index, box, pixel, style) => {
+		box.active = true;
 		if (style === 0) con.warn("animateBetween - you are passing in style which is 0!");
 		// style = style;// || int(0, 1);
 		// con.log("animateBetween");
+
+		style = 4;
+
+		box.material.color.setHex(pixel.colour);
 
 		switch(style) {
 			case 1 : // wiggle to new position.
@@ -175,11 +181,54 @@ let transitions = (() => {
 
 				var finalPos = getXY(pixel);
 				var m = 2;
-				var anim0 = TweenMax.to(pos, 5, {
+				var anim0 = TweenMax.to(pos, 2, {
+					//*/
 					bezier:[
-						{x: pos.x * m, y: pos.y * m, z: pos.z * m},
-						{x: finalPos.x, y: finalPos.y, z: 0}
+						{
+							x: num(-1, 1) * 10,
+							y: num(-1, 1) * 10,
+							z: 300 //num(-1, 1) * 1000
+						},
+						{
+							x: finalPos.x,
+							y: finalPos.y,
+							z: 0
+						}
 					],
+					//*/
+					// x: finalPos.x,
+					// y: finalPos.y,
+					// z: 0,
+					delay: num(0, 1),
+					ease: Power1.easeInOut,
+					onUpdate: () => {
+						box.position.set(pos.x, pos.y, pos.z);
+					}
+				});
+				break;
+
+			case 4 : // zoom to centre
+				var pos = {
+					x: box.position.x,
+					y: box.position.y,
+					z: box.position.z
+				};
+
+				var finalPos = getXY(pixel);
+				var anim0 = TweenMax.to(pos, 2, {
+					bezier:[
+						{
+							x: num(-1, 1) * 10,
+							y: num(-1, 1) * 10,
+							z: -300
+						},
+						{
+							x: finalPos.x,
+							y: finalPos.y,
+							z: 0
+						}
+					],
+					delay: num(0, 1),
 					ease: Power1.easeInOut,
 					onUpdate: () => {
 						box.position.set(pos.x, pos.y, pos.z);
@@ -192,6 +241,7 @@ let transitions = (() => {
 
 
 	let animateOut = (index, box, pixel, style) => {
+		if (box.active === false) return;
 		if (style === 0) con.warn("animateOut - you are passing in style which is 0!");
 		var pos = {
 			x: box.position.x,
@@ -199,13 +249,16 @@ let transitions = (() => {
 			z: box.position.z
 		};
 
-		var anim0 = TweenMax.to(pos, 5, {
-			x: box.position.x * 10,
-			y: box.position.y * 10,
+		var anim0 = TweenMax.to(pos, 2, {
+			x: box.position.x * num(100, 200),
+			y: box.position.y * num(100, 200),
 			z: 200,
-			ease: Power2.easeIn,
+			ease: Power4.easeIn,
 			onUpdate: () => {
 				box.position.set(pos.x, pos.y, pos.z);
+			},
+			onComplete: () => {
+				box.active = false;
 			}
 		});
 	}

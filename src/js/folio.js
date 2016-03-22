@@ -23,6 +23,8 @@ var camPos = {x: 0, y: 0, z: 10};
 
 var sw = window.innerWidth, sh = window.innerHeight;
 
+var backdrop = [];
+
 // var cols = 128;
 // var rows = 126;
 // var gap = 0;
@@ -40,7 +42,9 @@ function draw(props) {
 	// 	shading: THREE.SmoothShading
 	// });
 
-	var material = new THREE.MeshBasicMaterial({
+	var material = props.material || "MeshBasicMaterial";
+
+	var material = new THREE[material]({
 		color: props.colour
 	})
 
@@ -49,19 +53,49 @@ function draw(props) {
 	return object;
 }
 
+
+let newBackdrop = () => {
+	var colour = rand.int(80, 150);
+	var size = rand.int(30, 150);
+	var obj = draw({
+		colour: colour << 16 | colour << 8 | colour,
+		depth: size,
+		height: size,
+		width: size,
+		material: "MeshPhongMaterial"
+	});
+	obj.position.set(rand.num(-1000, 1000), rand.num(-1000, 1000), 1000);
+	scene.add(obj);
+	obj.motion = {
+		rotation: {
+			x: rand.num(-1, 1) * 0.01,
+			y: rand.num(-1, 1) * 0.01,
+			z: rand.num(-1, 1) * 0.01,
+		},
+		speed: rand.num(1, 5)
+	}
+	backdrop.push(obj);
+}
+
+
+
+
+
+
+
 function init() {
 
 	scene = new THREE.Scene();
-	scene.fog = new THREE.FogExp2(0xffffff, 0);//0.001);
+	scene.fog = new THREE.FogExp2(0xffffff, 0.001);
 
 	camera = new THREE.PerspectiveCamera(60, sw / sh, 1, 10000);
 	scene.add( camera );
 
-	var lightAbove = new THREE.DirectionalLight(0xffff80, 1);
+	var lightAbove = new THREE.DirectionalLight(0xffffff, 1);
 	lightAbove.position.set(-1, 1, 0.25).normalize();
 	scene.add( lightAbove );
 
-	var lightAbove2 = new THREE.DirectionalLight(0xff80ff, 1);
+	var lightAbove2 = new THREE.DirectionalLight(0xffffff, 2);
 	lightAbove2.position.set(1, 1, 0.25).normalize();
 	scene.add( lightAbove2 );
 
@@ -75,7 +109,7 @@ function init() {
 
 	let renderLogo = (logoIndex) => {
 
-		var pixels = bmp.getPixels(logoIndex);
+		var pixels = rand.shuffleArray(bmp.getPixels(logoIndex));
 
 		let createBox = (index, pixel) => {
 			var box;
@@ -84,7 +118,7 @@ function init() {
 				transitions.animateBetween(index, box, pixel, 3);
 			} else {
 				box = draw({
-					colour: pixel.r << 16 | pixel.r << 8 | pixel.r,
+					colour: pixel.colour,
 					depth: constants.size.depth,
 					height: constants.size.height,
 					width: constants.size.width
@@ -120,25 +154,28 @@ function init() {
 
 		setTimeout(() => {
 			renderLogo(++logoIndex);
-		}, 7000);
+		}, 4000);
 
 
 	};
 
-	var centre = draw({
-		colour: 0xff00ff,
-		depth: 50,
-		height: 150,
-		width: 600
-	});
-	centre.position.set(0, 0, 100);
-	scene.add(centre);
+	// var centre = draw({
+	// 	colour: 0xff00ff,
+	// 	depth: 50,
+	// 	height: 150,
+	// 	width: 600
+	// });
+	// centre.position.set(0, 0, 100);
+	// scene.add(centre);
+
+	newBackdrop();
+
 
 	document.body.appendChild(renderer.domElement);
 
 
 
-	var logoIndex = 3;//rand.int(0, 4);
+	var logoIndex = 2;//rand.int(0, 4);
 	renderLogo(logoIndex);
 
 
@@ -187,6 +224,16 @@ function move(x, y, z) {
 function render(time) {
 	// con.log("render");
 
+	if (Math.random() > 0.99) {
+		newBackdrop();
+	}
+	for (var i = 0, il = backdrop.length; i < il; i++) {
+		var obj = backdrop[i];
+		obj.position.z -= obj.motion.speed;
+		obj.rotation.x += obj.motion.rotation.x;
+		obj.rotation.y += obj.motion.rotation.y;
+		obj.rotation.z += obj.motion.rotation.z;
+	};
 
 	camPos.x -= (camPos.x - mouse.x * 1200) * 0.05;
 	camPos.y -= (camPos.y - mouse.y * 150) * 0.05;
@@ -204,6 +251,8 @@ function render(time) {
 	renderer.render( scene, camera );
 
 	// con.log(camPos);
+
+
 
 	requestAnimationFrame( render );
 }

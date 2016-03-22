@@ -2,7 +2,8 @@ function bitmapParser() {
 	let con = console;
 	let img = new Image();
 	// let montageWidth = 768, montageHeight = 630;
-	let montageWidth = 384, montageHeight = 126;
+	// let montageWidth = 384, montageHeight = 126;
+	let montageWidth = 256, montageHeight = 126;
 	var canvas, ctx;
 	let loadImage = (callback) => {
 		img.onload = () => {
@@ -31,7 +32,8 @@ function bitmapParser() {
 
 	let getPixels = (index) => {
 		// let maxImages = 30, cols = 6; // 6 x 5 matrix of client images
-		let maxImages = 3, cols = 3; // 3 x 1 matrix of client images
+		// let maxImages = 3, cols = 3; // 3 x 1 matrix of client images
+		let maxImages = 2, cols = 2; // 3 x 1 matrix of client images
 		index %= maxImages;
 		let x = index % cols;
 		let y = Math.floor(index / cols);
@@ -46,8 +48,9 @@ function bitmapParser() {
 			// ctx2.fillStyle = rgb;
 			// ctx2.fillRect(x, y, size, size);
 
-			if (red < 254) {
-				parsed.push({r: red, x: xp, y: yp});
+			if (red < 254 && parsed.length < 400) {
+				var colour = red << 16 | red << 8 | red;
+				parsed.push({colour: colour, x: xp, y: yp});
 			}
 		}
 		return parsed;
